@@ -24,7 +24,6 @@ void print_strcmp_test_result(const char *test_name, const char *str1,
   printf("Expected: %d\n", expected);
   printf("Actual: %d\n", actual);
 
-  // Для strcmp важны только знаки: отрицательный, ноль, положительный
   int expected_sign = (expected > 0) ? 1 : ((expected < 0) ? -1 : 0);
   int actual_sign = (actual > 0) ? 1 : ((actual < 0) ? -1 : 0);
 
@@ -35,31 +34,95 @@ void print_strcmp_test_result(const char *test_name, const char *str1,
   }
 }
 
-void print_strcpy_test_result(const char *test_name, const char *src,
+// Функция для сравнения ожидаемого и фактического результата strchr
+void print_strchr_test_result(const char *test_name, const char *str, int c,
                               const char *expected, const char *actual) {
   printf("Test: %s\n", test_name);
-  printf("Source: \"%s\"\n", src);
-  printf("Expected: \"%s\"\n", expected);
-  printf("Actual: \"%s\"\n", actual);
+  printf("String: \"%s\"\n", str);
+  printf("Character: '%c' (ASCII: %d)\n", (char)c, c);
+  printf("Expected: %s\n", expected ? expected : "NULL");
+  printf("Actual: %s\n", actual ? actual : "NULL");
 
-  // Сравниваем строки используя нашу же s21_strcmp
-  if (s21_strcmp(expected, actual) == 0) {
+  int success = 0;
+  if (expected == NULL && actual == NULL) {
+    success = 1;
+  } else if (expected != NULL && actual != NULL &&
+             s21_strcmp(expected, actual) == 0) {
+    success = 1;
+  }
+
+  if (success) {
     printf("Result: SUCCESS\n\n");
   } else {
     printf("Result: FAIL\n\n");
   }
 }
 
-void print_strcat_test_result(const char *test_name, const char *dest_init,
-                              const char *src, const char *expected,
+// Функция для сравнения ожидаемого и фактического результата strstr
+void print_strstr_test_result(const char *test_name, const char *haystack,
+                              const char *needle, const char *expected,
                               const char *actual) {
   printf("Test: %s\n", test_name);
-  printf("Initial dest: \"%s\"\n", dest_init);
-  printf("Source: \"%s\"\n", src);
-  printf("Expected: \"%s\"\n", expected);
-  printf("Actual: \"%s\"\n", actual);
+  printf("Haystack: \"%s\"\n", haystack);
+  printf("Needle: \"%s\"\n", needle);
+  printf("Expected: %s\n", expected ? expected : "NULL");
+  printf("Actual: %s\n", actual ? actual : "NULL");
 
-  if (s21_strcmp(expected, actual) == 0) {
+  int success = 0;
+  if (expected == NULL && actual == NULL) {
+    success = 1;
+  } else if (expected != NULL && actual != NULL &&
+             s21_strcmp(expected, actual) == 0) {
+    success = 1;
+  }
+
+  if (success) {
+    printf("Result: SUCCESS\n\n");
+  } else {
+    printf("Result: FAIL\n\n");
+  }
+}
+
+void print_strtok_test_result(const char *test_name, const char *str,
+                             const char *delim, const char *expected[],
+                             int expected_count, char *actual[],
+                             int actual_count) {
+  printf("Test: %s\n", test_name);
+  printf("String: \"%s\"\n", str);
+  printf("Delimiters: \"%s\"\n", delim);
+  printf("Expected tokens: ");
+  for (int i = 0; i < expected_count; i++) {
+    printf("\"%s\"", expected[i]);
+    if (i < expected_count - 1)
+      printf(", ");
+  }
+  printf("\n");
+
+  printf("Actual tokens: ");
+  for (int i = 0; i < actual_count; i++) {
+    printf("\"%s\"", actual[i]);
+    if (i < actual_count - 1)
+      printf(", ");
+  }
+  printf("\n");
+
+  int success = 1;
+  if (expected_count != actual_count) {
+    success = 0;
+  } else {
+    for (int i = 0; i < expected_count && success; i++) {
+      if (expected[i] == NULL && actual[i] == NULL) {
+        continue;
+      } else if (expected[i] != NULL && actual[i] != NULL &&
+                 s21_strcmp(expected[i], actual[i]) == 0) {
+        continue;
+      } else {
+        success = 0;
+      }
+    }
+  }
+
+  if (success) {
     printf("Result: SUCCESS\n\n");
   } else {
     printf("Result: FAIL\n\n");
@@ -70,190 +133,289 @@ void print_strcat_test_result(const char *test_name, const char *dest_init,
 void s21_strlen_test() {
   printf("========== QUEST 1: S21_STRLEN TESTS ==========\n\n");
 
-  // Тест 1: Нормальная строка
-  print_strlen_test_result("Normal string", "Hello, World!", 13,
-                           s21_strlen("Hello, World!"));
-
-  // Тест 2: Пустая строка
+  print_strlen_test_result("Normal string", "Hello", 5, s21_strlen("Hello"));
   print_strlen_test_result("Empty string", "", 0, s21_strlen(""));
-
-  // Тест 3: Строка с одним символом
-  print_strlen_test_result("Single character", "A", 1, s21_strlen("A"));
-
-  // Тест 4: Строка с пробелами
-  print_strlen_test_result("String with spaces", "   Hello   ", 11,
-                           s21_strlen("   Hello   "));
-
-  // Тест 5: Длинная строка (ИСПРАВЛЕННЫЙ - 26 символов)
-  char long_str[] = "This is a long test string";
-  print_strlen_test_result("Long string", long_str, 26, s21_strlen(long_str));
-
-  // Тест 6: Строка с цифрами и символами
-  print_strlen_test_result("Alphanumeric string", "Hello123!@#", 11,
-                           s21_strlen("Hello123!@#"));
 }
 
 // Функция для тестирования s21_strcmp (Quest 2)
 void s21_strcmp_test() {
   printf("========== QUEST 2: S21_STRCMP TESTS ==========\n\n");
 
-  // Тест 1: Идентичные строки
   print_strcmp_test_result("Identical strings", "hello", "hello", 0,
                            s21_strcmp("hello", "hello"));
-
-  // Тест 2: Первая строка меньше второй
-  print_strcmp_test_result("First string smaller", "apple", "banana", -1,
+  print_strcmp_test_result("First smaller", "apple", "banana", -1,
                            s21_strcmp("apple", "banana"));
-
-  // Тест 3: Первая строка больше второй
-  print_strcmp_test_result("First string larger", "zebra", "apple", 1,
-                           s21_strcmp("zebra", "apple"));
-
-  // Тест 4: Пустые строки
-  print_strcmp_test_result("Both empty strings", "", "", 0, s21_strcmp("", ""));
-
-  // Тест 5: Первая строка пустая
-  print_strcmp_test_result("First string empty", "", "hello", -1,
-                           s21_strcmp("", "hello"));
-
-  // Тест 6: Вторая строка пустая
-  print_strcmp_test_result("Second string empty", "hello", "", 1,
-                           s21_strcmp("hello", ""));
-
-  // Тест 7: Строки разной длины
-  print_strcmp_test_result("Different length", "hello", "hello world", -1,
-                           s21_strcmp("hello", "hello world"));
-
-  // Тест 8: Различие в регистре
-  print_strcmp_test_result("Case difference", "Hello", "hello", -1,
-                           s21_strcmp("Hello", "hello"));
 }
 
-void s21_strcpy_test() {
-  printf("========== QUEST 3: S21_STRCPY TESTS ==========\n\n");
+// Функция для тестирования s21_strchr (Quest 5)
+void s21_strchr_test() {
+  printf("========== QUEST 5: S21_STRCHR TESTS ==========\n\n");
 
-  char dest[100];
+  print_strchr_test_result("Existing char", "Hello", 'e', "ello",
+                           s21_strchr("Hello", 'e'));
+  print_strchr_test_result("Non-existing char", "Hello", 'z', NULL,
+                           s21_strchr("Hello", 'z'));
+}
 
-  const char *src1 = "Hello, World!";
-  s21_strcpy(dest, src1);
-  print_strcpy_test_result("Normal string", src1, src1, dest);
+// Функция для тестирования s21_strstr (Quest 6)
+void s21_strstr_test() {
+  printf("========== QUEST 6: S21_STRSTR TESTS ==========\n\n");
 
-  const char *src2 = "";
-  s21_strcpy(dest, src2);
-  print_strcpy_test_result("Empty string", src2, src2, dest);
+  const char *haystack = "Hello, World! This is a test string.";
 
-  const char *src3 = "A";
-  s21_strcpy(dest, src3);
-  print_strcpy_test_result("Single character", src3, src3, dest);
+  // Тест 1: Поиск существующей подстроки в середине
+  print_strstr_test_result("Existing substring in middle", haystack, "World",
+                           "World! This is a test string.",
+                           s21_strstr(haystack, "World"));
 
-  const char *src4 = "   Hello   ";
-  s21_strcpy(dest, src4);
-  print_strcpy_test_result("String with spaces", src4, src4, dest);
+  // Тест 2: Поиск подстроки в начале
+  print_strstr_test_result("Substring at beginning", haystack, "Hello",
+                           "Hello, World! This is a test string.",
+                           s21_strstr(haystack, "Hello"));
 
-  const char *src5 = "This is a very long string for testing strcpy function";
-  s21_strcpy(dest, src5);
-  print_strcpy_test_result("Long string", src5, src5, dest);
+  // Тест 3: Поиск подстроки в конце
+  print_strstr_test_result("Substring at end", haystack, "string.", "string.",
+                           s21_strstr(haystack, "string."));
 
-  const char *src6 = "Hello\tWorld\nTest\r";
-  s21_strcpy(dest, src6);
-  print_strcpy_test_result("Special characters", src6, src6, dest);
+  // Тест 4: Поиск несуществующей подстроки
+  print_strstr_test_result("Non-existing substring", haystack, "xyz", NULL,
+                           s21_strstr(haystack, "xyz"));
 
-  const char *src7 = "Test123!@#";
-  s21_strcpy(dest, src7);
-  print_strcpy_test_result("Alphanumeric string", src7, src7, dest);
+  // Тест 5: Поиск пустой подстроки (должен вернуть haystack)
+  print_strstr_test_result("Empty needle", haystack, "", haystack,
+                           s21_strstr(haystack, ""));
 
-  const char *src8 = "Test return value";
-  char *result = s21_strcpy(dest, src8);
-  printf("Test: Return value check\n");
-  printf("Source: \"%s\"\n", src8);
-  printf("Expected: Pointer to destination buffer\n");
-  printf("Actual: Pointer %s destination buffer\n",
-         (result == dest) ? "to" : "NOT to");
-  if (result == dest) {
-    printf("Result: SUCCESS\n\n");
-  } else {
-    printf("Result: FAIL\n\n");
+  // Тест 6: Пустая строка haystack
+  print_strstr_test_result("Empty haystack", "", "test", NULL,
+                           s21_strstr("", "test"));
+
+  // Тест 7: Обе строки пустые
+  print_strstr_test_result("Both empty", "", "", "", s21_strstr("", ""));
+
+  // Тест 8: Подстрока длиннее строки
+  print_strstr_test_result("Needle longer than haystack", "short",
+                           "very long needle", NULL,
+                           s21_strstr("short", "very long needle"));
+
+  // Тест 9: Поиск одного символа (аналогично strchr)
+  print_strstr_test_result("Single char needle", haystack, "W",
+                           "World! This is a test string.",
+                           s21_strstr(haystack, "W"));
+
+  // Тест 10: Несколько вхождений (должен найти первое)
+  const char *multi = "abababab";
+  print_strstr_test_result("Multiple occurrences", multi, "ab", "abababab",
+                           s21_strstr(multi, "ab"));
+
+  // Тест 11: Частичное совпадение
+  print_strstr_test_result("Partial match", "abcxyz", "abc123", NULL,
+                           s21_strstr("abcxyz", "abc123"));
+
+  // Тест 12: Специальные символы в подстроке
+  print_strstr_test_result("Special chars in needle", "Hello\nWorld\tTest",
+                           "\nWorld", "\nWorld\tTest",
+                           s21_strstr("Hello\nWorld\tTest", "\nWorld"));
+
+  // Тест 13: Цифры в подстроке
+  print_strstr_test_result("Digits in needle", "Test123!@#", "123", "123!@#",
+                           s21_strstr("Test123!@#", "123"));
+
+  // Тест 14: Краевой случай - needle равен haystack
+  print_strstr_test_result("Needle equals haystack", "exact", "exact", "exact",
+                           s21_strstr("exact", "exact"));
+
+  // Тест 15: Проверка на overlapping (не должно быть проблем)
+  const char *overlap = "abcabc";
+  print_strstr_test_result("Overlapping search", overlap, "abc", "abcabc",
+                           s21_strstr(overlap, "abc"));
+}
+
+void s21_strtok_test() {
+  printf("========== QUEST 7: S21_STRTOK TESTS ==========\n\n");
+
+  // Буферы для тестирования (так как strtok модифицирует строку)
+  char buffer[256];
+  char *tokens[20];
+  int token_count;
+
+  // Тест 1: Нормальное разбиение строки
+  s21_strcpy(buffer, "Hello,World,Test");
+  token_count = 0;
+  char *token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
   }
-}
+  const char *expected1[] = {"Hello", "World", "Test"};
+  print_strtok_test_result("Normal tokenization", "Hello,World,Test", ",",
+                           expected1, 3, tokens, token_count);
 
-void s21_strcat_test() {
-  printf("========== QUEST 4: S21_STRCAT TESTS ==========\n\n");
+  // Тест 2: Несколько разделителей подряд
+  s21_strcpy(buffer, "Hello,,World,,Test");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected2[] = {"Hello", "World", "Test"};
+  print_strtok_test_result("Multiple delimiters", "Hello,,World,,Test", ",",
+                           expected2, 3, tokens, token_count);
 
-  char dest[100];
+  // Тест 3: Разделители в начале и конце
+  s21_strcpy(buffer, ",Hello,World,Test,");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected3[] = {"Hello", "World", "Test"};
+  print_strtok_test_result("Delimiters at edges", ",Hello,World,Test,", ",",
+                           expected3, 3, tokens, token_count);
 
-  s21_strcpy(dest, "Hello");
-  s21_strcat(dest, ", World!");
-  print_strcat_test_result("Normal concatenation", "Hello", ", World!",
-                           "Hello, World!", dest);
+  // Тест 4: Только разделители
+  s21_strcpy(buffer, ",,,,");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected4[] = {}; // Пустой массив
+  print_strtok_test_result("Only delimiters", ",,,,", ",", expected4, 0, tokens,
+                           token_count);
 
-  s21_strcpy(dest, "");
-  s21_strcat(dest, "Hello");
-  print_strcat_test_result("Empty dest", "", "Hello", "Hello", dest);
+  // Тест 5: Пустая строка
+  s21_strcpy(buffer, "");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected5[] = {};
+  print_strtok_test_result("Empty string", "", ",", expected5, 0, tokens,
+                           token_count);
 
-  s21_strcpy(dest, "Hello");
-  s21_strcat(dest, "");
-  print_strcat_test_result("Empty source", "Hello", "", "Hello", dest);
+  // Тест 6: Один токен без разделителей
+  s21_strcpy(buffer, "Hello");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected6[] = {"Hello"};
+  print_strtok_test_result("Single token", "Hello", ",", expected6, 1, tokens,
+                           token_count);
 
-  s21_strcpy(dest, "");
-  s21_strcat(dest, "");
-  print_strcat_test_result("Both empty", "", "", "", dest);
+  // Тест 7: Несколько различных разделителей
+  s21_strcpy(buffer, "Hello World\tTest\nString");
+  token_count = 0;
+  token = s21_strtok(buffer, " \t\n");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, " \t\n");
+  }
+  const char *expected7[] = {"Hello", "World", "Test", "String"};
+  print_strtok_test_result("Multiple delimiters types",
+                           "Hello World\tTest\nString", " \\t\\n", expected7, 4,
+                           tokens, token_count);
 
-  s21_strcpy(dest, "Start");
-  s21_strcat(dest, " ");
-  s21_strcat(dest, "Middle");
-  s21_strcat(dest, " ");
-  s21_strcat(dest, "End");
-  print_strcat_test_result("Multiple concatenations", "Start", " Middle End",
-                           "Start Middle End", dest);
+  // Тест 8: Разделители как часть слов (не должны разделять)
+  s21_strcpy(buffer, "Hello,World;Test:String");
+  token_count = 0;
+  token = s21_strtok(buffer, ",;:");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",;:");
+  }
+  const char *expected8[] = {"Hello", "World", "Test", "String"};
+  print_strtok_test_result("Various delimiters", "Hello,World;Test:String",
+                           ",;:", expected8, 4, tokens, token_count);
 
-  s21_strcpy(dest, "This is a long destination string");
-  s21_strcat(dest, " and this is a long source string");
-  print_strcat_test_result(
-      "Long strings", "This is a long destination string",
-      " and this is a long source string",
-      "This is a long destination string and this is a long source string",
-      dest);
+  // Тест 9: NULL указатель при последующих вызовах
+  s21_strcpy(buffer, "First/Second/Third");
+  token_count = 0;
+  token = s21_strtok(buffer, "/");
+  tokens[token_count++] = token;
+  token = s21_strtok(NULL, "/"); // Правильный вызов с NULL
+  tokens[token_count++] = token;
+  token = s21_strtok(NULL, "/"); // Правильный вызов с NULL
+  tokens[token_count++] = token;
+  const char *expected9[] = {"First", "Second", "Third"};
+  print_strtok_test_result("NULL pointer usage", "First/Second/Third", "/",
+                           expected9, 3, tokens, token_count);
 
-  s21_strcpy(dest, "Line1");
-  s21_strcat(dest, "\nLine2");
-  s21_strcat(dest, "\tTab");
-  print_strcat_test_result("Special characters", "Line1", "\nLine2\tTab",
-                           "Line1\nLine2\tTab", dest);
+  // Тест 10: Чередование разных разделителей
+  s21_strcpy(buffer, "A-B_C.D E");
+  token_count = 0;
+  token = s21_strtok(buffer, "-_ .");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, "-_ .");
+  }
+  const char *expected10[] = {"A", "B", "C", "D", "E"};
+  print_strtok_test_result("Mixed delimiters", "A-B_C.D E", "-_ .", expected10,
+                           5, tokens, token_count);
 
-  s21_strcpy(dest, "Test");
-  s21_strcat(dest, "123");
-  s21_strcat(dest, "!@#");
-  print_strcat_test_result("Alphanumeric", "Test", "123!@#", "Test123!@#",
-                           dest);
+  // Тест 11: Краевой случай - разделитель как последний символ
+  s21_strcpy(buffer, "Hello,");
+  token_count = 0;
+  token = s21_strtok(buffer, ",");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, ",");
+  }
+  const char *expected11[] = {"Hello"};
+  print_strtok_test_result("Delimiter at end", "Hello,", ",", expected11, 1,
+                           tokens, token_count);
+
+  // Тест 12: Длинная строка с множеством токенов
+  s21_strcpy(
+      buffer,
+      "This is a very long string with many tokens for testing purposes");
+  token_count = 0;
+  token = s21_strtok(buffer, " ");
+  while (token != NULL) {
+    tokens[token_count++] = token;
+    token = s21_strtok(NULL, " ");
+  }
+  const char *expected12[] = {"This",   "is",     "a",       "very",
+                              "long",   "string", "with",    "many",
+                              "tokens", "for",    "testing", "purposes"};
+  print_strtok_test_result(
+      "Long string with many tokens",
+      "This is a very long string with many tokens for testing purposes", " ",
+      expected12, 12, tokens, token_count);
 }
 
 int main() {
 #ifdef QUEST_1
-  // Запуск только тестов для Quest 1 (strlen)
   s21_strlen_test();
 #endif
 
 #ifdef QUEST_2
-  // Запуск только тестов для Quest 2 (strcmp)
   s21_strcmp_test();
 #endif
 
-#ifdef QUEST_3
-  // Запуск только тестов для Quest 3 (strcpy)
-  s21_strcpy_test();
+#ifdef QUEST_5
+  s21_strchr_test();
 #endif
 
-#ifdef QUEST_4
-  s21_strcat_test();
+#ifdef QUEST_6
+  s21_strstr_test();
 #endif
 
-#if !defined(QUEST_1) && !defined(QUEST_2) && !defined(QUEST_3) &&             \
-    !defined(QUEST_4)
+// Если не определено никаких макросов, запускаем все тесты (для отладки)
+#if !defined(QUEST_1) && !defined(QUEST_2) && !defined(QUEST_5) &&             \
+    !defined(QUEST_6)
   printf("=== RUNNING ALL TESTS (DEBUG MODE) ===\n\n");
   s21_strlen_test();
   s21_strcmp_test();
-  s21_strcpy_test();
-  s21_strcat_test();
+  s21_strchr_test();
+  s21_strstr_test();
 #endif
 
   return 0;

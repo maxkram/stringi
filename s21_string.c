@@ -40,3 +40,52 @@ char *s21_strcat(char *dest, const char *src) {
 
   return start;
 }
+
+char *s21_strchr(const char *str, int c) {
+  char *result = NULL;
+
+  while (*str != '\0') {
+    if (*str == (char)c) {
+      result = (char *)str;
+      break;
+    }
+    str++;
+  }
+
+  if (result == NULL && (char)c == '\0') {
+    result = (char *)str;
+  }
+
+  return result;
+}
+
+char *s21_strstr(const char *haystack, const char *needle) {
+  char *result = NULL;
+
+  if (needle == NULL || *needle == '\0') {
+    result = (char *)haystack;
+  } else {
+    while (*haystack != '\0' && result == NULL) {
+      const char *h = haystack;
+      const char *n = needle;
+
+      while (*h != '\0' && *n != '\0' && *h == *n) {
+        h++;
+        n++;
+      }
+
+      if (*n == '\0') {
+        result = (char *)haystack;
+      }
+
+      if (*h == '\0') {
+        break;
+      }
+
+      haystack++;
+    }
+  }
+
+  return result;
+}
+
