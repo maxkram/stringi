@@ -34,12 +34,12 @@ int s21_strcmp(const char *str1, const char *str2) {
 char *s21_strcpy(char *dest, const char *src) {
     if (dest == NULL || src == NULL) return dest;
 
-    char *start = dest;
-
-    while ((*dest++ = *src++) != '\0') {
+    char *d = dest;
+    while (*src != '\0') {
+        *d++ = *src++;
     }
-
-    return start;
+    *d = '\0';
+    return dest;
 }
 
 char *s21_strcat(char *dest, const char *src) {
@@ -124,6 +124,9 @@ char *s21_strtok(char *str, const char *delim) {
     char *result = NULL;
 
     if (str != NULL) {
+        size_t len = s21_strlen(str);
+        if (len >= sizeof(saved_str)) {
+        }
         s21_strncpy(saved_str, str, sizeof(saved_str) - 1);
         saved_str[sizeof(saved_str) - 1] = '\0';
         last = saved_str;
