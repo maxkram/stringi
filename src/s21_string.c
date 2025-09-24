@@ -1,7 +1,8 @@
 #include "s21_string.h"
 
-unsigned long s21_strlen(const char *str) {
-    unsigned long length = 0;
+size_t s21_strlen(const char *str) {
+    if (str == NULL) return 0;
+    size_t length = 0;
 
     while (str[length] != '\0') {
         length++;
@@ -11,15 +12,28 @@ unsigned long s21_strlen(const char *str) {
 }
 
 int s21_strcmp(const char *str1, const char *str2) {
-    while (*str1 && (*str1 == *str2)) {
-        str1++;
-        str2++;
+    int result = 0;
+
+    if (str1 == NULL && str2 == NULL) {
+        result = 0;
+    } else if (str1 == NULL) {
+        result = -1;
+    } else if (str2 == NULL) {
+        result = 1;
+    } else {
+        while (*str1 && (*str1 == *str2)) {
+            str1++;
+            str2++;
+        }
+        result = *(const unsigned char *)str1 - *(const unsigned char *)str2;
     }
 
-    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+    return result;
 }
 
 char *s21_strcpy(char *dest, const char *src) {
+    if (dest == NULL || src == NULL) return dest;
+
     char *start = dest;
 
     while ((*dest++ = *src++) != '\0') {
@@ -29,6 +43,8 @@ char *s21_strcpy(char *dest, const char *src) {
 }
 
 char *s21_strcat(char *dest, const char *src) {
+    if (dest == NULL || src == NULL) return dest;
+
     char *start = dest;
 
     while (*dest != '\0') {
@@ -43,44 +59,39 @@ char *s21_strcat(char *dest, const char *src) {
 char *s21_strchr(const char *str, int c) {
     char *result = NULL;
 
-    while (*str != '\0') {
-        if (*str == (char)c) {
-            result = (char *)str;
-            break;
-        }
-        str++;
-    }
+    if (str != NULL) {
+        const char *ptr = str;
 
-    if (result == NULL && (char)c == '\0') {
-        result = (char *)str;
+        while (*ptr != '\0' && *ptr != (char)c) {
+            ptr++;
+        }
+
+        if (*ptr == (char)c) {
+            result = (char *)ptr;
+        }
     }
 
     return result;
 }
 
 char *s21_strstr(const char *haystack, const char *needle) {
+    if (haystack == NULL || needle == NULL) return NULL;
+    if (*needle == '\0') return (char *)haystack;
+
     char *result = NULL;
 
-    if (needle == NULL || *needle == '\0') {
-        result = (char *)haystack;
-    } else {
-        while (*haystack != '\0' && result == NULL) {
-            const char *h = haystack;
-            const char *n = needle;
+    while (result == NULL && *haystack != '\0') {
+        const char *h = haystack;
+        const char *n = needle;
 
-            while (*h != '\0' && *n != '\0' && *h == *n) {
-                h++;
-                n++;
-            }
+        while (*h != '\0' && *n != '\0' && *h == *n) {
+            h++;
+            n++;
+        }
 
-            if (*n == '\0') {
-                result = (char *)haystack;
-            }
-
-            if (*h == '\0') {
-                break;
-            }
-
+        if (*n == '\0') {
+            result = (char *)haystack;
+        } else {
             haystack++;
         }
     }
@@ -88,50 +99,49 @@ char *s21_strstr(const char *haystack, const char *needle) {
     return result;
 }
 
+char *s21_strncpy(char *dest, const char *src, size_t n) {
+    if (dest == NULL || src == NULL) return dest;
+
+    char *start = dest;
+    size_t i = 0;
+
+    for (; i < n && src[i] != '\0'; i++) {
+        dest[i] = src[i];
+    }
+
+    for (; i < n; i++) {
+        dest[i] = '\0';
+    }
+
+    return start;
+}
+
 char *s21_strtok(char *str, const char *delim) {
+    if (delim == NULL) return NULL;
+
     static char *last = NULL;
     static char saved_str[1024];
     char *result = NULL;
 
-    if (delim == NULL) return NULL;
-    if (str == NULL && last == NULL) return NULL;
-
-    int deliDict[256] = {0};
-    for (const char *d = delim; *d != '\0'; d++) {
-        deliDict[(unsigned char)*d] = 1;
-    }
     if (str != NULL) {
-        if (s21_strlen(str) < sizeof(saved_str)) {
-            s21_strcpy(saved_str, str);
-            last = saved_str;
+        s21_strncpy(saved_str, str, sizeof(saved_str) - 1);
+        saved_str[sizeof(saved_str) - 1] = '\0';
+        last = saved_str;
+    }
+
+    if (last != NULL) {
+        while (*last && s21_strchr(delim, *last)) last++;
+
+        if (*last) {
+            result = last;
+            while (*last && !s21_strchr(delim, *last)) last++;
+            if (*last)
+                *last++ = '\0';
+            else
+                last = NULL;
         } else {
             last = NULL;
         }
-    }
-    if (last == NULL || *last == '\0') {
-        last = NULL;
-        return NULL;
-    }
-
-    while (*last != '\0' && deliDict[(unsigned char)*last]) {
-        last++;
-    }
-
-    if (*last == '\0') {
-        last = NULL;
-        return NULL;
-    }
-
-    result = last;
-    while (*last != '\0' && !deliDict[(unsigned char)*last]) {
-        last++;
-    }
-
-    if (*last != '\0') {
-        *last = '\0';
-        last++;
-    } else {
-        last = NULL;
     }
 
     return result;
